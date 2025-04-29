@@ -1,34 +1,111 @@
+/* Global Styles */
 body {
-    font-family: Arial, sans-serif;
-    background-color: #e6f2ff;
-    text-align: center;
-    padding: 50px;
-}
-
-.container {
-    background: white;
-    padding: 20px;
-    margin: auto;
-    border-radius: 10px;
-    max-width: 400px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    font-family: 'Roboto', sans-serif;
+    background-color: #f4f6f9;
+    color: #333;
+    margin: 0;
+    padding: 0;
 }
 
 h1 {
-    color: #0077b6;
+    font-size: 32px;
+    color: #2C3E50;
+    margin-bottom: 30px;
 }
 
-.data p {
+.container {
+    max-width: 1000px;
+    margin: auto;
+    padding: 40px;
+    background: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+}
+
+.card {
+    background: #ffffff;
+    padding: 20px;
+    margin: 20px 0;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.card h2 {
+    font-size: 24px;
+    margin-bottom: 10px;
+    color: #2980B9;
+}
+
+.card p {
     font-size: 18px;
-    margin: 10px 0;
+    color: #7F8C8D;
 }
 
+.card .value {
+    font-size: 22px;
+    font-weight: bold;
+    color: #2C3E50;
+}
+
+/* Water Quality Status */
+.card .status {
+    font-size: 20px;
+    font-weight: bold;
+    color: #e74c3c;
+}
+
+.card .fresh {
+    color: #27ae60;
+}
+
+.card .soapy {
+    color: #8e44ad;
+}
+
+.card .dirty {
+    color: #e67e22;
+}
+
+/* Button */
 button {
-    padding: 10px 20px;
-    margin-top: 20px;
-    background-color: #0077b6;
+    background-color: #2980B9;
     color: white;
+    font-size: 16px;
+    padding: 10px 25px;
     border: none;
-    border-radius: 5px;
+    border-radius: 8px;
     cursor: pointer;
+    transition: background-color 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+button:hover {
+    background-color: #1F618D;
+}
+
+/* Chart */
+canvas {
+    margin-top: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .container {
+        padding: 20px;
+    }
+    
+    h1 {
+        font-size: 28px;
+    }
+
+    .card {
+        margin: 10px 0;
+    }
+    
+    button {
+        width: 100%;
+        padding: 12px;
+    }
 }
