@@ -2,44 +2,25 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Water Quality Monitoring Dashboard</title>
+    <title>Water Quality Monitoring</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-
     <div class="container">
         <h1>Water Quality Monitoring Dashboard</h1>
-
-        <div class="card">
-            <h2>TDS (Total Dissolved Solids)</h2>
-            <p class="value" id="tds">Loading...</p>
+        <div class="metrics">
+            <p><strong>TDS:</strong> <span id="tds">Loading...</span></p>
+            <p><strong>Turbidity:</strong> <span id="turbidity">Loading...</span></p>
+            <p><strong>pH:</strong> <span id="ph">Loading...</span></p>
+            <p><strong>Temperature:</strong> <span id="waterTemp">Loading...</span></p>
+            <p><strong>Water Quality:</strong> <span id="waterQuality">Loading...</span></p>
         </div>
-
-        <div class="card">
-            <h2>Turbidity</h2>
-            <p class="value" id="turbidity">Loading...</p>
+        <div class="chart-container">
+            <h2>Water Temperature Over Time</h2>
+            <canvas id="tempChart" width="600" height="300"></canvas>
         </div>
-
-        <div class="card">
-            <h2>pH Level</h2>
-            <p class="value" id="ph">Loading...</p>
-        </div>
-
-        <div class="card">
-            <h2>Water Temperature</h2>
-            <p class="value" id="waterTemp">Loading...</p>
-        </div>
-
-        <div class="card">
-            <h2>Water Quality Status</h2>
-            <p class="status" id="waterQuality">Loading...</p>
-        </div>
-
-        <canvas id="dataChart" width="400" height="200"></canvas>
-        <button onclick="fetchData()">Refresh Data</button>
     </div>
-
     <script src="script.js"></script>
 </body>
 </html>
