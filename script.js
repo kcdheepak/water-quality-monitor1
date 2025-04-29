@@ -1,49 +1,40 @@
 const CHANNEL_ID = "2916390";
 const API_KEY = "296041B1B0F708F6";
 
-const WATER_TEMPERATURE_THRESHOLD = 25;
-const TDS_THRESHOLD = 500;
-const TURBIDITY_THRESHOLD = 10;
-const PH_LOW_THRESHOLD = 6.5;
-const PH_HIGH_THRESHOLD = 8.5;
-
-let chart;
+let tempChart;
 
 function getWaterQuality(tds, turbidity, ph, waterTemp) {
-    tds = parseFloat(tds);
     turbidity = parseFloat(turbidity);
-    ph = parseFloat(ph);
-    waterTemp = parseFloat(waterTemp);
 
-    if (isNaN(tds) || isNaN(turbidity) || isNaN(ph) || isNaN(waterTemp)) {
-        console.warn("Invalid sensor values:", { tds, turbidity, ph, waterTemp });
+    if (isNaN(turbidity)) {
+        console.warn("Invalid turbidity value:", turbidity);
         return "Insufficient Data";
     }
 
-    if (tds > TDS_THRESHOLD && ph > 8.5) {
+    if (turbidity >= 38 && turbidity <= 43) {
+        return "Fresh Water";
+    } else if (turbidity >= 60 && turbidity <= 71) {
         return "Soapy Water";
-    } else if (turbidity > TURBIDITY_THRESHOLD || ph < PH_LOW_THRESHOLD || ph > PH_HIGH_THRESHOLD) {
+    } else if (turbidity > 71 && turbidity <= 81) {
         return "Dirty Water";
     } else {
-        return "Fresh Water";
+        return "Unknown";
     }
 }
 
 async function fetchData() {
     try {
-        const url = `https://api.thingspeak.com/channels/${CHANNEL_ID}/feeds.json?api_key=${API_KEY}&results=1`;
+        const url = `https://api.thingspeak.com/channels/${CHANNEL_ID}/feeds.json?api_key=${API_KEY}&results=10`;
         const response = await fetch(url);
         const data = await response.json();
         const feeds = data.feeds;
 
         if (feeds.length > 0) {
-            const latestFeed = feeds[0];
+            const latestFeed = feeds[feeds.length - 1];
             const tds = latestFeed.field1;
             const turbidity = latestFeed.field2;
             const ph = latestFeed.field3;
             const waterTemp = latestFeed.field4;
-
-            console.log("Sensor values:", { tds, turbidity, ph, waterTemp });
 
             document.getElementById("tds").textContent = tds ? `${tds} ppm` : "N/A";
             document.getElementById("turbidity").textContent = turbidity ? `${turbidity} NTU` : "N/A";
@@ -53,14 +44,47 @@ async function fetchData() {
             const waterQuality = getWaterQuality(tds, turbidity, ph, waterTemp);
             const statusElement = document.getElementById("waterQuality");
             statusElement.textContent = waterQuality;
-            statusElement.classList.remove("fresh", "soapy", "dirty");
-
+            statusElement.className = "";
             if (waterQuality === "Fresh Water") {
                 statusElement.classList.add("fresh");
             } else if (waterQuality === "Soapy Water") {
                 statusElement.classList.add("soapy");
             } else if (waterQuality === "Dirty Water") {
                 statusElement.classList.add("dirty");
+            } else {
+                statusElement.classList.add("unknown");
+            }
+
+            const labels = feeds.map(f => new Date(f.created_at).toLocaleTimeString());
+            const temps = feeds.map(f => parseFloat(f.field4));
+
+            if (!tempChart) {
+                const ctx = document.getElementById("tempChart").getContext("2d");
+                tempChart = new Chart(ctx, {
+                    type: "line",
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: "Water Temperature (°C)",
+                            data: temps,
+                            fill: false,
+                            borderColor: "rgba(75, 192, 192, 1)",
+                            tension: 0.1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: false
+                            }
+                        }
+                    }
+                });
+            } else {
+                tempChart.data.labels = labels;
+                tempChart.data.datasets[0].data = temps;
+                tempChart.update();
             }
         }
     } catch (error) {
@@ -69,4 +93,4 @@ async function fetchData() {
 }
 
 window.onload = fetchData;
-setInterval(fetchData, 3000);
+setInterval(fetchData, 5000);
