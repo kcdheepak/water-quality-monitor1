@@ -1,7 +1,12 @@
 const CHANNEL_ID = "2916390";
 const API_KEY = "296041B1B0F708F6";
 
-const WATER_LEVEL_THRESHOLD = 100; // Set your desired threshold value here (in cm)
+const WATER_TEMPERATURE_THRESHOLD = 25; // Ideal water temperature in °C
+const TDS_THRESHOLD = 500; // TDS value in ppm for fresh water
+const TURBIDITY_THRESHOLD = 10; // Turbidity threshold for clean water
+const PH_LOW_THRESHOLD = 6.5; // Lower acceptable pH value for healthy water
+const PH_HIGH_THRESHOLD = 8.5; // Upper acceptable pH value for healthy water
+
 let chart; // global chart instance
 
 // EmailJS Setup (Replace with your own EmailJS credentials)
@@ -9,13 +14,13 @@ const EMAILJS_SERVICE_ID = 'YOUR_EMAILJS_SERVICE_ID';
 const EMAILJS_TEMPLATE_ID = 'YOUR_EMAILJS_TEMPLATE_ID';
 const EMAILJS_USER_ID = 'YOUR_EMAILJS_USER_ID';
 
-// This function sends an email when the water level exceeds the threshold
-async function sendEmailNotification(waterLevel) {
+// This function sends an email when the water quality is poor
+async function sendEmailNotification(waterQuality) {
     const templateParams = {
-        from_name: 'Water Monitoring System',
+        from_name: 'Water Quality Monitoring System',
         to_email: 'YOUR_EMAIL_ADDRESS', // Replace with your email
-        subject: 'Water Level Exceeded Threshold!',
-        message: `Warning: The water level has exceeded the threshold. Current water level is ${waterLevel} cm.`,
+        subject: `Water Quality Alert - ${waterQuality}`,
+        message: `Warning: The water quality has been detected as ${waterQuality}. Please take necessary actions.`,
     };
 
     try {
@@ -35,24 +40,41 @@ async function fetchData() {
 
         if (feeds.length > 0) {
             const latestFeed = feeds[0];
-            const waterLevel = latestFeed.field1 || 'N/A';
-            const waterTemp = latestFeed.field2 || 'N/A';
+            const tds = latestFeed.field1 || 'N/A';
+            const turbidity = latestFeed.field2 || 'N/A';
+            const ph = latestFeed.field3 || 'N/A';
+            const waterTemp = latestFeed.field4 || 'N/A';
 
-            document.getElementById("waterLevel").textContent = waterLevel + " cm";
+            document.getElementById("tds").textContent = tds + " ppm";
+            document.getElementById("turbidity").textContent = turbidity + " NTU";
+            document.getElementById("ph").textContent = ph;
             document.getElementById("waterTemp").textContent = waterTemp + " °C";
 
-            // Check if water level exceeds threshold and send email notification
-            if (parseFloat(waterLevel) > WATER_LEVEL_THRESHOLD) {
-                alert("Warning: Water level exceeds threshold! Current level: " + waterLevel + " cm");
-                sendEmailNotification(waterLevel);
+            // Determine water quality
+            const waterQuality = getWaterQuality(tds, turbidity, ph, waterTemp);
+            document.getElementById("waterQuality").textContent = waterQuality;
+
+            // Update the color based on the water quality
+            const statusElement = document.getElementById("waterQuality");
+            if (waterQuality === 'Fresh Water') {
+                statusElement.classList.add('fresh');
+                statusElement.classList.remove('soapy', 'dirty');
+            } else if (waterQuality === 'Soapy Water') {
+                statusElement.classList.add('soapy');
+                statusElement.classList.remove('fresh', 'dirty');
+            } else {
+                statusElement.classList.add('dirty');
+                statusElement.classList.remove('soapy', 'fresh');
             }
 
             // Extract chart data
             const labels = feeds.map(feed => new Date(feed.created_at).toLocaleTimeString());
-            const waterLevelData = feeds.map(feed => parseFloat(feed.field1));
-            const waterTempData = feeds.map(feed => parseFloat(feed.field2));
+            const tdsData = feeds.map(feed => parseFloat(feed.field1));
+            const turbidityData = feeds.map(feed => parseFloat(feed.field2));
+            const phData = feeds.map(feed => parseFloat(feed.field3));
+            const waterTempData = feeds.map(feed => parseFloat(feed.field4));
 
-            updateChart(labels, waterLevelData, waterTempData);
+            updateChart(labels, tdsData, turbidityData, phData, waterTempData);
         }
 
     } catch (error) {
@@ -61,7 +83,20 @@ async function fetchData() {
     }
 }
 
-function updateChart(labels, waterLevelData, waterTempData) {
+function getWaterQuality(tds, turbidity, ph, waterTemp) {
+    // Determine if the water is Soapy, Dirty, or Fresh based on the thresholds
+    if (parseFloat(tds) > TDS_THRESHOLD && parseFloat(ph) > 8) {
+        return "Soapy Water";
+    } else if (parseFloat(turbidity) > TURBIDITY_THRESHOLD || parseFloat(ph) < PH_LOW_THRESHOLD || parseFloat(ph) > PH_HIGH_THRESHOLD) {
+        return "Dirty Water";
+    } else if (parseFloat(waterTemp) > WATER_TEMPERATURE_THRESHOLD) {
+        return "Fresh Water";
+    } else {
+        return "Fresh Water";
+    }
+}
+
+function updateChart(labels, tdsData, turbidityData, phData, waterTempData) {
     const ctx = document.getElementById('dataChart').getContext('2d');
 
     if (chart) chart.destroy(); // reset existing chart
@@ -72,20 +107,36 @@ function updateChart(labels, waterLevelData, waterTempData) {
             labels: labels,
             datasets: [
                 {
-                    label: 'Water Level (cm)',
-                    data: waterLevelData,
-                    borderColor: '#0077b6',
-                    backgroundColor: 'rgba(0, 119, 182, 0.2)',
+                    label: 'TDS (ppm)',
+                    data: tdsData,
+                    borderColor: '#2980B9',
+                    backgroundColor: 'rgba(41, 128, 185, 0.3)',
                     fill: true,
-                    tension: 0.3
+                    tension: 0.4
                 },
                 {
-                    label: 'Water Temp (°C)',
-                    data: waterTempData,
-                    borderColor: '#f77f00',
-                    backgroundColor: 'rgba(247, 127, 0, 0.2)',
+                    label: 'Turbidity (NTU)',
+                    data: turbidityData,
+                    borderColor: '#E67E22',
+                    backgroundColor: 'rgba(230, 126, 34, 0.3)',
                     fill: true,
-                    tension: 0.3
+                    tension: 0.4
+                },
+                {
+                    label: 'pH Level',
+                    data: phData,
+                    borderColor: '#27AE60',
+                    backgroundColor: 'rgba(39, 174, 96, 0.3)',
+                    fill: true,
+                    tension: 0.4
+                },
+                {
+                    label: 'Water Temperature (°C)',
+                    data: waterTempData,
+                    borderColor: '#8E44AD',
+                    backgroundColor: 'rgba(142, 68, 173, 0.3)',
+                    fill: true,
+                    tension: 0.4
                 }
             ]
         },
