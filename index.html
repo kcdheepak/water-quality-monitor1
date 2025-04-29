@@ -4,14 +4,13 @@
     <meta charset="UTF-8">
     <title>Water Quality Monitoring Dashboard</title>
     <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
     <div class="container">
         <h1>Water Quality Monitoring Dashboard</h1>
-        
-        <!-- Water Quality Information -->
+
         <div class="card">
             <h2>TDS (Total Dissolved Solids)</h2>
             <p class="value" id="tds">Loading...</p>
@@ -31,17 +30,13 @@
             <h2>Water Temperature</h2>
             <p class="value" id="waterTemp">Loading...</p>
         </div>
-        
-        <!-- Water Quality Status -->
+
         <div class="card">
             <h2>Water Quality Status</h2>
             <p class="status" id="waterQuality">Loading...</p>
         </div>
 
-        <!-- Chart -->
         <canvas id="dataChart" width="400" height="200"></canvas>
-        
-        <!-- Refresh Button -->
         <button onclick="fetchData()">Refresh Data</button>
     </div>
 
