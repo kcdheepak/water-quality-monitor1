@@ -3,20 +3,22 @@ const API_KEY = "296041B1B0F708F6";
 
 let tempChart;
 
-function getWaterQuality(tds, turbidity, ph, waterTemp) {
+function getWaterQuality(tds, turbidity, ph, temp) {
+    tds = parseFloat(tds);
     turbidity = parseFloat(turbidity);
+    ph = parseFloat(ph);
+    temp = parseFloat(temp);
 
-    if (isNaN(turbidity)) {
-        console.warn("Invalid turbidity value:", turbidity);
+    if ([tds, turbidity, ph, temp].some(v => isNaN(v))) {
         return "Insufficient Data";
     }
 
-    if (turbidity >= 38 && turbidity <= 43) {
-        return "Fresh Water";
-    } else if (turbidity >= 60 && turbidity <= 71) {
+    if (turbidity >= 60 && turbidity <= 71 && ph > 8.5) {
         return "Soapy Water";
-    } else if (turbidity > 71 && turbidity <= 81) {
+    } else if (turbidity >= 71 && turbidity <= 81) {
         return "Dirty Water";
+    } else if (turbidity >= 38 && turbidity <= 43 && tds < 500 && ph >= 6.5 && ph <= 8.5) {
+        return "Fresh Water";
     } else {
         return "Unknown";
     }
@@ -55,6 +57,7 @@ async function fetchData() {
                 statusElement.classList.add("unknown");
             }
 
+            // Update temperature chart
             const labels = feeds.map(f => new Date(f.created_at).toLocaleTimeString());
             const temps = feeds.map(f => parseFloat(f.field4));
 
