@@ -69,4 +69,4 @@ async function fetchData() {
 }
 
 window.onload = fetchData;
-setInterval(fetchData, 30000);
+setInterval(fetchData, 3000);
