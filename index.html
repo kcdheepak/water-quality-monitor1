@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Water Monitoring Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Chart.js CDN -->
+</head>
+<body>
+    <div class="container">
+        <h1>Water Monitoring Dashboard</h1>
+        <div class="data">
+            <p><strong>Water Level:</strong> <span id="waterLevel">Loading...</span></p>
+            <p><strong>Water Temperature:</strong> <span id="waterTemp">Loading...</span></p>
+        </div>
+
+        <canvas id="dataChart" width="400" height="200"></canvas>
+
+        <button onclick="fetchData()">Refresh Data</button>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
